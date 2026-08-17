@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { apiOk, apiError } from '@/lib/utils'
+import { rateLimit, getIp, rateLimitResponse } from '@/lib/rate-limit'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 
@@ -10,6 +11,9 @@ const schema = z.object({
 })
 
 export async function GET(req: Request) {
+  const ip = getIp(req)
+  const rl = rateLimit(`delegate-get:${ip}`, 20, 15 * 60 * 1000)
+  if (!rl.allowed) return rateLimitResponse(rl.resetAt)
   const { searchParams } = new URL(req.url)
   const token = searchParams.get('token')
   if (!token) return apiError('Token required.')
@@ -33,6 +37,10 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const ip = getIp(req)
+  const rl = rateLimit(`delegate-post:${ip}`, 10, 15 * 60 * 1000)
+  if (!rl.allowed) return rateLimitResponse(rl.resetAt)
+
   const body = await req.json()
   const parsed = schema.safeParse(body)
   if (!parsed.success) return apiError(parsed.error.errors[0].message)

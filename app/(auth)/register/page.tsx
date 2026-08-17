@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState } from 'react'
 import { LogoMark } from '@/components/LogoMark'
 import { signIn } from 'next-auth/react'
@@ -43,9 +43,7 @@ export default function RegisterPage() {
         {/* ── LEFT PANEL ── */}
         <div className="auth-left-panel">
           <div className="auth-left-inner">
-            <Link href="/" className="auth-logo-link">
-              <LogoMark href="/" size="md" />
-            </Link>
+            <LogoMark href="/" size="md" className="auth-logo-link" />
 
             <div className="auth-left-content">
               <h1 className="auth-left-h1">India&apos;s trusted CA-backed tax platform</h1>

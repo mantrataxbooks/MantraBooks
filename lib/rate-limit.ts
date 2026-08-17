@@ -11,7 +11,19 @@ interface WindowEntry {
   resetAt: number
 }
 
+const MAX_STORE_SIZE = 10000
 const store = new Map<string, WindowEntry>()
+
+/** Prune expired entries to prevent memory leaks */
+function pruneExpired(now: number) {
+  if (store.size > MAX_STORE_SIZE) {
+    for (const [key, val] of store.entries()) {
+      if (now > val.resetAt) {
+        store.delete(key)
+      }
+    }
+  }
+}
 
 /**
  * Check whether a given key (typically an IP) has exceeded the allowed
@@ -28,6 +40,7 @@ export function rateLimit(
   windowMs: number
 ): { allowed: boolean; remaining: number; resetAt: number } {
   const now = Date.now()
+  pruneExpired(now)
   const entry = store.get(key)
 
   if (!entry || now > entry.resetAt) {

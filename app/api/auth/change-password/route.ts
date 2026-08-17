@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { apiOk, apiError } from '@/lib/utils'
+import { rateLimit, getIp, rateLimitResponse } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const schema = z.object({
@@ -13,6 +14,11 @@ const schema = z.object({
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return apiError('Unauthorized', 401)
+
+  // Rate limit: max 5 password changes per user/IP per 15 minutes
+  const ip = getIp(req)
+  const rl = rateLimit(`change-pw:${session.user.id}:${ip}`, 5, 15 * 60 * 1000)
+  if (!rl.allowed) return rateLimitResponse(rl.resetAt)
 
   const body = await req.json()
   const parsed = schema.safeParse(body)

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 import { useState, useEffect, Suspense } from 'react'
 import { LogoMark } from '@/components/LogoMark'
 import { signIn } from 'next-auth/react'
@@ -45,9 +45,7 @@ function LoginForm() {
         {/* ── LEFT PANEL ── */}
         <div className="auth-left-panel">
           <div className="auth-left-inner">
-            <Link href="/" className="auth-logo-link">
-              <LogoMark href="/" size="md" />
-            </Link>
+            <LogoMark href="/" size="md" className="auth-logo-link" />
 
             <div className="auth-left-content">
               <h1 className="auth-left-h1">Welcome back to India&apos;s most trusted CA platform</h1>

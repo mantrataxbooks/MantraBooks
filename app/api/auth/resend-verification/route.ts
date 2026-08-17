@@ -3,11 +3,17 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { apiOk, apiError } from '@/lib/utils'
 import { sendVerificationEmail } from '@/lib/email'
+import { rateLimit, getIp, rateLimitResponse } from '@/lib/rate-limit'
 import { randomBytes } from 'crypto'
 
-export async function POST() {
+export async function POST(req: Request) {
   const session = await getServerSession(authOptions)
   if (!session) return apiError('Unauthorized', 401)
+
+  // Rate limit: max 3 resend attempts per user/IP per 15 minutes
+  const ip = getIp(req)
+  const rl = rateLimit(`resend-verify:${session.user.id}:${ip}`, 3, 15 * 60 * 1000)
+  if (!rl.allowed) return rateLimitResponse(rl.resetAt)
 
   const user = await prisma.user.findUnique({ where: { id: session.user.id } })
   if (!user) return apiError('User not found', 404)

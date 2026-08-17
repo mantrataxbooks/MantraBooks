@@ -37,6 +37,11 @@ export async function PATCH(req: Request) {
   const { s3Key } = await req.json()
   if (!s3Key || typeof s3Key !== 'string') return apiError('s3Key required')
 
+  const expectedPrefix = `avatars/${session.user.id}/`
+  if (!s3Key.startsWith(expectedPrefix)) {
+    return apiError('Invalid avatar key path.', 400)
+  }
+
   await prisma.user.update({
     where: { id: session.user.id },
     data: { avatarUrl: s3Key },
