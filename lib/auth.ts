@@ -6,13 +6,16 @@ import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { UserRole } from '@prisma/client'
 
-// Fail fast at startup if the secret is missing or left as placeholder
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET
-if (!NEXTAUTH_SECRET || NEXTAUTH_SECRET === 'change-this-to-random-32-char-string') {
-  throw new Error(
-    '[auth] NEXTAUTH_SECRET is not set or is still the default placeholder. ' +
-    'Generate a real secret with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'base64\'))"'
-  )
+// Resolved at runtime (not at build time) to avoid Vercel static generation failures
+function getSecret(): string {
+  const s = process.env.NEXTAUTH_SECRET
+  if (!s || s === 'change-this-to-random-32-char-string') {
+    throw new Error(
+      '[auth] NEXTAUTH_SECRET is not set or is still the default placeholder. ' +
+      'Generate a real secret with: openssl rand -base64 32'
+    )
+  }
+  return s
 }
 
 const loginSchema = z.object({
@@ -30,7 +33,7 @@ const googleProviders = process.env.GOOGLE_CLIENT_ID
   : []
 
 export const authOptions: NextAuthOptions = {
-  secret: NEXTAUTH_SECRET,
+  secret: getSecret(),
   session: { strategy: 'jwt', maxAge: 24 * 60 * 60 },
   pages: {
     signIn: '/login',

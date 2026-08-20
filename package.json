@@ -2,6 +2,9 @@
   "name": "mantrabooks",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "next dev",
     "clean": "powershell -Command \"Remove-Item -Recurse -Force .next, out, dist -ErrorAction SilentlyContinue\"",
@@ -21,7 +24,7 @@
     "bcryptjs": "^2.4.3",
     "next": "^16.2.9",
     "next-auth": "^4.24.15",
-    "nodemailer": "^9.0.5",
+    "nodemailer": "^7.0.13",
     "pdfkit": "^0.15.0",
     "prisma": "^5.14.0",
     "react": "^18",
